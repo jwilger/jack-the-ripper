@@ -1,0 +1,7 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/jack_the_ripper
+lib/jack_the_ripper.rb
+test/test_jack_the_ripper.rb
