@@ -4,14 +4,16 @@ require 'rubygems'
 require 'hoe'
 require './lib/jack_the_ripper.rb'
 
-Hoe.new('JackTheRipper', JackTheRipper::VERSION) do |p|
+Hoe.new('JackTheRIPper', JackTheRipper::VERSION) do |p|
   p.rubyforge_name = 'jack_the_ripper'
-  # p.author = 'FIX'
-  # p.email = 'FIX'
-  # p.summary = 'FIX'
-  # p.description = p.paragraphs_of('README.txt', 2..5).join("\n\n")
-  # p.url = p.paragraphs_of('README.txt', 0).first.split(/\n/)[1..-1]
+  p.author = 'John Wilger'
+  p.email = 'johnwilger@gmail.com'
+  p.summary = 'RIP Postscript documents and transform images based on ' +
+    'instructions pulled from Amazon SQS'
+  p.description = p.paragraphs_of('README.txt', 2..5).join("\n\n")
+  p.url = 'http://johnwilger.com/search?q=JackTheRIPper'
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
+  p.extra_deps = %w(  )
 end
 
 # vim: syntax=Ruby
