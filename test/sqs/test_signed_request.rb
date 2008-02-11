@@ -29,4 +29,14 @@ class TestSQSSignedRequest < Test::Unit::TestCase
       'ReceiveMessage', { 'MaxNumberOfMessages' => '1' } )
     assert_equal expected_body, result
   end
+  
+  def test_should_raise_exception_if_sqs_response_is_not_in_2xx_range
+    response = Net::HTTPServerError.allocate
+    response.expects( :error! ).raises( Net::HTTPServerException.allocate )
+    Net::HTTP.stubs( :post_form ).returns( response )
+    assert_raises( Net::HTTPServerException ) do
+      SQS::SignedRequest.send( 'mykey', 'mysecret', 'myqueue',
+        'ReceiveMessage', { 'MaxNumberOfMessages' => '1' } )
+    end
+  end
 end

@@ -11,7 +11,12 @@ module SQS
         params.merge!( 'Signature' => Signature.new( secret_access_key, params ).to_s )
         uri = URI.parse( "http://queue.amazonaws.com/#{queue}" )
         response = Net::HTTP.post_form( uri, params )
-        response.read_body
+        case response
+        when Net::HTTPSuccess
+          response.read_body
+        else
+          response.error!
+        end
       end
       
       private
