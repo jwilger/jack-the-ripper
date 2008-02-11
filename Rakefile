@@ -4,7 +4,7 @@ require 'rubygems'
 require 'hoe'
 require './lib/jack_the_ripper.rb'
 
-Hoe.new('JackTheRIPper', JackTheRipper::VERSION) do |p|
+Hoe.new('JackTheRIPper', JackTheRIPper::VERSION) do |p|
   p.rubyforge_name = 'jack_the_ripper'
   p.author = 'John Wilger'
   p.email = 'johnwilger@gmail.com'
