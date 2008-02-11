@@ -8,16 +8,16 @@ class TestSQSSignature < Test::Unit::TestCase
       'QueueName' => 'queue2',
       'AWSAccessKeyId' => '0A8BDF2G9KCB3ZNKFA82',
       'SignatureVersion' => '1',
-      'Expires' => '2007-01-12T12:00:00Z',
+      'Timestamp' => '2007-01-12T12:00:00Z',
       'Version' => '2006-04-01'
     }
     sig = SQS::Signature.new( 'abc123', params )
     expected = CGI.escape( Base64.encode64( Digest::SHA1.hexdigest(
       'Action' + 'CreateQueue' +
       'AWSAccessKeyId' + '0A8BDF2G9KCB3ZNKFA82' +
-      'Expires' + '2007-01-12T12:00:00Z' +
       'QueueName' + 'queue2' +
       'SignatureVersion' + '1' +
+      'Timestamp' + '2007-01-12T12:00:00Z' +
       'Version' + '2006-04-01' +
       'abc123'
     ) ) )
