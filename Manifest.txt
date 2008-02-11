@@ -4,4 +4,6 @@ README.txt
 Rakefile
 bin/jack_the_ripper
 lib/jack_the_ripper.rb
+lib/sqs/signature.rb
+test/sqs/test_signature.rb
 test/test_jack_the_ripper.rb
