@@ -11,7 +11,7 @@ class TestSQSSignature < Test::Unit::TestCase
       'Expires' => '2007-01-12T12:00:00Z',
       'Version' => '2006-04-01'
     }
-    sig = SQS::Signature.new( :secret => 'abc123', :params => params )
+    sig = SQS::Signature.new( 'abc123', params )
     expected = CGI.escape( Base64.encode64( Digest::SHA1.hexdigest(
       'Action' + 'CreateQueue' +
       'AWSAccessKeyId' + '0A8BDF2G9KCB3ZNKFA82' +

@@ -4,9 +4,9 @@ require 'cgi'
 
 module SQS
   class Signature
-    def initialize( args = {} )
-      @params = args[ :params ]
-      @secret = args[ :secret ]
+    def initialize( secret, params )
+      @params = params
+      @secret = secret
     end
     
     def to_s
