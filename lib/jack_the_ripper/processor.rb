@@ -21,6 +21,7 @@ module JackTheRIPper
       result_file = HTTPFile.new( @result_uri, result_path )
       result_file.put
       result_file.delete
+      `say "Image converted. Money in the bank!"`
     end
     
     private
