@@ -6,6 +6,7 @@ bin/jack_the_ripper
 lib/jack_the_ripper.rb
 lib/jack_the_ripper/http_file.rb
 lib/jack_the_ripper/processor.rb
+test/jack_the_ripper/test_http_file.rb
 test/jack_the_ripper/test_processor.rb
 test/test_jack_the_ripper.rb
 vendor/mocha/COPYING
