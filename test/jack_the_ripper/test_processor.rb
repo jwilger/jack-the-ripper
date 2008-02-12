@@ -6,6 +6,7 @@ require 'jack_the_ripper/processor'
 class TestJackTheRIPperProcessor < Test::Unit::TestCase
   def test_should_convert_image_format_to_jpeg_and_put_resulting_file
     working_dir_path = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
+    JackTheRIPper.stubs( :tmp_path ).returns( working_dir_path )
     instruction = {
       :source_uri => 'http://example.com/source_file',
       :result_uri => 'http://example.com/result_file',
@@ -38,6 +39,7 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
 
   def test_should_convert_image_format_to_png_and_put_resulting_file
     working_dir_path = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
+    JackTheRIPper.stubs( :tmp_path ).returns( working_dir_path )
     instruction = {
       :source_uri => 'http://example.com/source_file',
       :result_uri => 'http://example.com/result_file',
@@ -70,6 +72,7 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
 
   def test_should_scale_image_to_specified_max_dimension_and_put_resulting_file
     working_dir_path = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
+    JackTheRIPper.stubs( :tmp_path ).returns( working_dir_path )
     instruction = {
       :source_uri => 'http://example.com/source_file',
       :result_uri => 'http://example.com/result_file',
@@ -102,6 +105,7 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
 
   def test_should_pad_image_to_specified_width_and_height_and_put_resulting_file
     working_dir_path = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
+    JackTheRIPper.stubs( :tmp_path ).returns( working_dir_path )
     instruction = {
       :source_uri => 'http://example.com/source_file',
       :result_uri => 'http://example.com/result_file',
@@ -134,6 +138,7 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
   
   def test_should_combine_options
     working_dir_path = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
+    JackTheRIPper.stubs( :tmp_path ).returns( working_dir_path )
     instruction = {
       :source_uri => 'http://example.com/source_file',
       :result_uri => 'http://example.com/result_file',

@@ -6,13 +6,22 @@ require 'right_aws'
 
 module JackTheRIPper
   VERSION = '0.1.0'
-  
   class << self
+    def tmp_path
+      @tmp_path || '/tmp'
+    end
+    
+    def tmp_path=( path )
+      @tmp_path = path
+    end
+    
     def process_next_message( queue )
       message = queue.receive
+      return false if message.nil?
       processor = Processor.new( YAML::load( message.body ) )
       processor.process
       message.delete
+      true
     end
     
     def get_queue( access_key_id, secret_access_key, queue_name )

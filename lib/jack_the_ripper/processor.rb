@@ -2,8 +2,6 @@ require 'jack_the_ripper/http_file'
 
 module JackTheRIPper
   class Processor
-    WORKING_PATH = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
-    
     def initialize( instructions )
       @source_uri = instructions[ :source_uri ]
       @result_uri = instructions[ :result_uri ]
@@ -13,9 +11,9 @@ module JackTheRIPper
     end
     
     def process
-      source_file = HTTPFile.get( @source_uri, WORKING_PATH, 'source' )
+      source_file = HTTPFile.get( @source_uri, JackTheRIPper.tmp_path, 'source' )
       result_ext = @format.nil? ? File.extname( source_file.path ) : ".#{@format}"
-      result_path = WORKING_PATH + '/result' + result_ext
+      result_path = JackTheRIPper.tmp_path + '/result' + result_ext
       `sips #{sips_args} #{source_file.path} --out #{result_path}`
       source_file.delete
       result_file = HTTPFile.new( @result_uri, result_path )
