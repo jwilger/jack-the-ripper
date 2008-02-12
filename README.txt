@@ -35,6 +35,35 @@ locations when starting the system by passing the --pid and --log switches,
 respectively. Note that if you change the location of the pidfile, you will
 also need to pass the --pid option when stopping the system.
 
+=== SQS Message Body
+
+The body of the SQS messages to be processed by JackTheRIPper should be a YAML
+encoded Hash with the following keys:
+
+* :source_uri - REQUIRED An HTTP URI pointing to the source image
+	(i.e. 'http://example.com/an_image.pdf' ). A GET request to this URI must
+	return the image file and a valid Content-Type header.
+* :result_uri - REQUIRED An HTTP URI to which a PUT request will be sent containing the
+	converted image data. The correct Content-Type header will also be sent with
+	this request.
+* :format - OPTIONAL One of :jpeg, :tiff, :png, :gif, :jp2, :pict, :bmp,
+	:qtif, :psd, :sgi, :tga. The result file will be saved in this format.
+* :scale - OPTIONAL The maximum dimension of the width and height of the
+	result. The result image will be scaled to fit, maintaining the aspect
+	ratio.
+* :pad - OPTIONAL "HxW COLOR" Pads the image using COLOR to the specified
+	dimensions. COLOR should be specified using a hex code such as 'FFFFFF'.
+	
+Example:
+
+	instruction = YAML.dump( {
+		:source_uri => 'http://example.com/an_image.pdf',
+		:result_uri => 'http://example.com/receive_image/123',
+		:format => :jpeg,
+		:scale => 100,
+		:pad => '100x100 FFFFFF'
+	} )
+
 == REQUIREMENTS:
 
 * OSX 10.5.x
