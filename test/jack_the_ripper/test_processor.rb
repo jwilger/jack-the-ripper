@@ -170,4 +170,27 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
     
     processor.process
   end
+  
+  def test_should_raise_conversion_failed_exception_if_sips_process_exits_uncleanly
+    working_dir_path = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
+    JackTheRIPper.stubs( :tmp_path ).returns( working_dir_path )
+    instruction = {
+      :source_uri => 'http://example.com/source_file',
+      :result_uri => 'http://example.com/result_file'
+    }
+    processor = JackTheRIPper::Processor.new( instruction )
+    
+    source_file = stub_everything( :path => '/foo/bar.jpg' )
+    result_file = stub_everything
+
+    JackTheRIPper::HTTPFile.stubs( :get ).returns( source_file )
+    JackTheRIPper::HTTPFile.stubs( :new ).returns( result_file )
+
+    processor = JackTheRIPper::Processor.new( instruction )
+    
+    processor.stubs( :` ).returns( 'blah blah blah' )
+    $?.stubs( :success? ).returns( false )
+    
+    assert_raises( JackTheRIPper::Processor::ConversionFailed ) { processor.process }
+  end
 end
