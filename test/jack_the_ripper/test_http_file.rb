@@ -12,11 +12,11 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
       with( URI.parse( 'http://example.com/file.pdf' ) ).
       returns( http_result )
     f = mock
-    File.expects( :open ).with( '/tmp/source.pdf', 'w' ).yields( f )
+    File.expects( :open ).with( '/tmp/source', 'w' ).yields( f )
     f.expects( :write ).with( 'file contents' )
     file = JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
       '/tmp', 'source' )
-    assert_equal '/tmp/source.pdf', file.path
+    assert_equal '/tmp/source', file.path
   end
   
   def test_should_get_file_via_redirect
@@ -101,6 +101,13 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
         '/tmp', 'source', 10 )
     end
   end
+  
+  def test_should_raise_remote_error_if_get_fails_due_to_connection_refused
+    Net::HTTP.stubs( :get_response ).raises( Errno::ECONNREFUSED )
+    assert_raises( JackTheRIPper::RemoteError ) do
+      JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf', '/tmp', 'source' )
+    end
+  end
 
   def test_should_raise_remote_error_if_put_fails_due_to_server_error
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
@@ -132,5 +139,12 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     http_response = Net::HTTPClientError.allocate
     http_conn.stubs( :send_request ).returns( http_response )
     assert_raises( JackTheRIPper::ProcessorError ) { f.put }
+  end
+  
+  def test_should_raise_remote_error_if_connection_refused_during_put
+    f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
+      '/tmp/result.jpg' )
+    Net::HTTP.stubs( :start ).raises( Errno::ECONNREFUSED )
+    assert_raises( JackTheRIPper::RemoteError ) { f.put }
   end
 end

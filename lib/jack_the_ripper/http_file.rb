@@ -32,7 +32,9 @@ module JackTheRIPper
         end
       end
     rescue Timeout::Error => e
-      raise RemoteError, "Got Timeout Error for PUT: #{uri}"
+      raise RemoteError, "Got Timeout Error for PUT: #{@uri}"
+    rescue Errno::ECONNREFUSED => e
+      raise RemoteError, "Connection Refused during PUT: #{@uri}"
     end
     
     class << self
@@ -43,8 +45,7 @@ module JackTheRIPper
         result = Net::HTTP.get_response( URI.parse( uri ) )
         case result
         when Net::HTTPSuccess
-          ext = MIME::Types[ result.content_type ].first.extensions.first
-          file_path = directory + '/' + basename + '.' + ext
+          file_path = directory + '/' + basename
           File.open( file_path, 'w' ) { |f| f.write( result.read_body ) }
           new( nil, file_path )
         when Net::HTTPRedirection
@@ -56,6 +57,8 @@ module JackTheRIPper
         end
       rescue Timeout::Error => e
         raise RemoteError, "Got Timeout Error for GET: #{uri}"
+      rescue Errno::ECONNREFUSED => e
+        raise RemoteError, "Connection Refused during GET: #{uri}"
       end
     end
   end
