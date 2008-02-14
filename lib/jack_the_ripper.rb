@@ -6,9 +6,15 @@ require 'right_aws'
 
 module JackTheRIPper
   VERSION = '0.1.2'
+  
+  class RemoteError < StandardError; end
+  class ProcessorError < StandardError; end
+  
   class << self
+    attr_accessor :logger
+    
     def tmp_path
-      @tmp_path || '/tmp'
+      @tmp_path ||= '/tmp'
     end
     
     def tmp_path=( path )
@@ -20,6 +26,13 @@ module JackTheRIPper
       return false if message.nil?
       processor = Processor.new( YAML::load( message.body ) )
       processor.process
+      message.delete
+      true
+    rescue RemoteError => e
+      logger.warn( 'Remote Error: ' + e.message )
+      true
+    rescue ProcessorError => e
+      logger.error( 'Processor Error: ' + e.message )
       message.delete
       true
     end

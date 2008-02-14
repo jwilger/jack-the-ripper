@@ -4,6 +4,13 @@ require 'mocha'
 require 'jack_the_ripper'
 
 class TestJackTheRIPper < Test::Unit::TestCase
+  def test_should_allow_logger_to_be_set_and_retrieved
+    logger = stub
+    assert_nil JackTheRIPper.logger
+    assert_nothing_raised { JackTheRIPper.logger = logger }
+    assert_same logger, JackTheRIPper.logger
+  end
+  
   def test_should_process_one_message_from_the_queue_then_delete_the_message_and_return_true
     queue = mock
     message = mock
@@ -15,6 +22,34 @@ class TestJackTheRIPper < Test::Unit::TestCase
     JackTheRIPper::Processor.expects( :new ).with( { :foo => 'bar' } ).
       returns( processor )
     processor.expects( :process )
+    assert_equal true, JackTheRIPper.process_next_message( queue )
+  end
+  
+  def test_should_not_delete_message_from_queue_if_conversion_fails_due_to_remote_error
+    logger = mock
+    JackTheRIPper.logger = logger
+    message = mock
+    queue = stub_everything( :receive => message )
+    message.stubs( :body ).returns( 'foo' )
+    message.expects( :delete ).never
+    processor = stub
+    JackTheRIPper::Processor.stubs( :new ).returns( processor )
+    processor.stubs( :process ).raises( JackTheRIPper::RemoteError.new( 'blah' ) )
+    logger.expects( :warn ).with( 'Remote Error: blah' )
+    assert_equal true, JackTheRIPper.process_next_message( queue )
+  end
+  
+  def test_should_delete_message_from_queue_if_conversion_fails_due_to_processor_error
+    logger = mock
+    JackTheRIPper.logger = logger
+    message = mock
+    queue = stub_everything( :receive => message )
+    message.stubs( :body ).returns( 'foo' )
+    message.expects( :delete )
+    processor = stub
+    JackTheRIPper::Processor.stubs( :new ).returns( processor )
+    processor.stubs( :process ).raises( JackTheRIPper::ProcessorError.new( 'blah' ) )
+    logger.expects( :error ).with( 'Processor Error: blah' )
     assert_equal true, JackTheRIPper.process_next_message( queue )
   end
   

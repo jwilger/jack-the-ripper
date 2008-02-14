@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+unless ENV[ 'AWS_ACCESS_KEY_ID' ] && ENV[ 'AWS_SECRET_ACCESS_KEY' ]
+  raise "Must set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY first!"
+end
 Signal.trap( "INT" ) { shutdown() }
 Signal.trap( "TERM" ) { shutdown() }
 
@@ -13,30 +16,27 @@ require 'optparse'
 require 'ostruct'
 
 options = OpenStruct.new
-options.access_key_id = ''
-options.secret_access_key = ''
+options.access_key_id = ENV[ 'AWS_ACCESS_KEY_ID' ]
+options.secret_access_key = ENV[ 'AWS_SECRET_ACCESS_KEY' ]
 options.queue_name = ''
 options.tmp_path = '/tmp'
+options.log_file = '/var/log/jack_the_ripper.log'
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: jack_the_ripper_server [options]"
   opts.separator ""
   opts.separator "Specific options:"
-  
-  opts.on( '-a', '--access_key_id AWS_ACCESS_KEY_ID', 'REQUIRED' ) do |access_key_id|
-    options.access_key_id = access_key_id
-  end
-  
-  opts.on( '-s', '--secret_access_key AWS_SECRET_ACCESS_KEY', 'REQUIRED' ) do |secret_access_key|
-    options.secret_access_key = secret_access_key
-  end
-  
+    
   opts.on( '-q', '--queue SQS_QUEUE_NAME', 'REQUIRED' ) do |queue_name|
     options.queue_name = queue_name
   end
   
-  opts.on( '-t', '--tmpdir [TMPDIR]', 'Path to save temporary image files. Defaults to "/tmp"' ) do |tmp_path|
+  opts.on( '-t', '--tmpdir [PATH]', 'Path to save temporary image files. Defaults to "/tmp"' ) do |tmp_path|
     options.tmp_path = tmp_path
+  end
+  
+  opts.on( '-l', '--log [PATH]', 'Path to the log file. Defaults to "/var/log/jack_The_ripper.log"' ) do |log_file|
+    options.log_file = log_file
   end
   
   opts.on_tail("-h", "--help", "Show this message") do
@@ -47,19 +47,18 @@ end
 opts.parse!( ARGV )
 
 JackTheRIPper.tmp_path = options.tmp_path
+JackTheRIPper.logger = Logger.new( options.log_file )
 queue = JackTheRIPper.get_queue( options.access_key_id,
   options.secret_access_key, options.queue_name )
-
-while @keep_running do
-  begin
+begin
+  while @keep_running do
     if JackTheRIPper.process_next_message( queue ) == false
       60.times { sleep( 1 ) if @keep_running }
     end
-  rescue Exception => e
-    STDERR.puts( "An Exception Occured!" )
-    STDERR.puts( e.to_s )
-    STDERR.puts( e.message )
-    STDERR.puts( e.backtrace.join( "\n" ) )
-    STDERR.puts( "\n\n" )
   end
+  exit 0
+rescue Exception => e
+  JackTheRIPper.logger.fatal e.class.to_s + ': ' + e.message
+  JackTheRIPper.logger.fatal e.backtrace.join( "\n" )
+  exit 1
 end

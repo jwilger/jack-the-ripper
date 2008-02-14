@@ -14,29 +14,43 @@ module JackTheRIPper
     end
     
     def delete
-      File.unlink( @path )
+      File.unlink( @path ) if File.exist?( @path )
     end
     
     def put
       uri = URI.parse( @uri )
       content_type = MIME::Types.type_for( @path ).first.content_type
       Net::HTTP.start( uri.host, uri.port ) do |http|
-        result = http.send_request( 'PUT', uri.request_uri, File.read( @path ), { 'Content-Type' => content_type } )
-        result.error! unless result.kind_of?( Net::HTTPSuccess )
+        result = http.send_request( 'PUT', uri.request_uri, Base64.encode64( File.read( @path ) ), { 'Content-Type' => content_type } )
+        case result
+        when Net::HTTPSuccess
+          # ok
+        when Net::HTTPClientError
+          raise ProcessorError, "Got #{result.code} #{result.message} for PUT: #{@uri}"
+        else
+          raise RemoteError, "Got #{result.code} #{result.message} for PUT: #{@uri}"
+        end
       end
+    rescue Timeout::Error => e
+      raise RemoteError, "Got Timeout Error for PUT: #{uri}"
     end
     
     class << self
       def get( uri, directory, basename )
         result = Net::HTTP.get_response( URI.parse( uri ) )
-        if result.kind_of?( Net::HTTPSuccess )
+        case result
+        when Net::HTTPSuccess
           ext = MIME::Types[ result.content_type ].first.extensions.first
           file_path = directory + '/' + basename + '.' + ext
           File.open( file_path, 'w' ) { |f| f.write( result.read_body ) }
           new( nil, file_path )
+        when Net::HTTPClientError
+          raise ProcessorError, "Got #{result.code} #{result.message} for GET: #{uri}"
         else
-          result.error!
+          raise RemoteError, "Got #{result.code} #{result.message} for GET: #{uri}"
         end
+      rescue Timeout::Error => e
+        raise RemoteError, "Got Timeout Error for GET: #{uri}"
       end
     end
   end
