@@ -36,7 +36,10 @@ module JackTheRIPper
     end
     
     class << self
-      def get( uri, directory, basename )
+      def get( uri, directory, basename, redirection_limit = 10 )
+        if redirection_limit == 0
+          raise ProcessorError, "Too many redirects for GET: #{uri}"
+        end
         result = Net::HTTP.get_response( URI.parse( uri ) )
         case result
         when Net::HTTPSuccess
@@ -44,6 +47,8 @@ module JackTheRIPper
           file_path = directory + '/' + basename + '.' + ext
           File.open( file_path, 'w' ) { |f| f.write( result.read_body ) }
           new( nil, file_path )
+        when Net::HTTPRedirection
+          get( result[ 'location' ], directory, basename, redirection_limit - 1 )
         when Net::HTTPClientError
           raise ProcessorError, "Got #{result.code} #{result.message} for GET: #{uri}"
         else

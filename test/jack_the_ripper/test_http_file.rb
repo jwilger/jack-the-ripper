@@ -11,12 +11,29 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     Net::HTTP.expects( :get_response ).
       with( URI.parse( 'http://example.com/file.pdf' ) ).
       returns( http_result )
-    file = mock
-    File.expects( :open ).with( '/tmp/source.pdf', 'w' ).yields( file )
-    file.expects( :write ).with( 'file contents' )
+    f = mock
+    File.expects( :open ).with( '/tmp/source.pdf', 'w' ).yields( f )
+    f.expects( :write ).with( 'file contents' )
     file = JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
       '/tmp', 'source' )
     assert_equal '/tmp/source.pdf', file.path
+  end
+  
+  def test_should_get_file_via_redirect
+    redirect = Net::HTTPRedirection.allocate
+    redirect.stubs( :[] ).with( 'location' ).returns( 'http://example.com/file.pdf' )
+    http_result = Net::HTTPSuccess.allocate
+    http_result.stubs( :content_type ).returns( 'application/pdf' )
+    http_result.stubs( :read_body ).returns( 'file contents' )
+    Net::HTTP.expects( :get_response ).
+      with( URI.parse( 'http://example.com/redirect_me' ) ).
+      returns( redirect )
+    Net::HTTP.expects( :get_response ).
+      with( URI.parse( 'http://example.com/file.pdf' ) ).
+      returns( http_result )
+    f = stub_everything
+    File.stubs( :open ).yields( f )
+    JackTheRIPper::HTTPFile.get( 'http://example.com/redirect_me', '/tmp', 'source' )
   end
   
   def test_should_delete_file_from_path
@@ -69,6 +86,19 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     assert_raises( JackTheRIPper::ProcessorError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
         '/tmp', 'source' )
+    end
+  end
+  
+  def test_should_raise_processor_error_if_get_redirects_too_many_times
+    http_result = Net::HTTPRedirection.allocate
+    http_result.expects( :[] ).at_least_once.
+      with( 'location' ).returns( 'http://example.com/file.pdf' )
+    Net::HTTP.expects( :get_response ).times( 10 ).
+      with( URI.parse( 'http://example.com/file.pdf' ) ).
+      returns( http_result )
+    assert_raises( JackTheRIPper::ProcessorError ) do
+      JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
+        '/tmp', 'source', 10 )
     end
   end
 
