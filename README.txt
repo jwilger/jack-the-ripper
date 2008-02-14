@@ -23,17 +23,14 @@ transformation operations are performed using the SIPS utility.
 
 == SYNOPSIS:
 
-Just run `jack_the_ripper start` to start the service as a daemon.
+First, you must set the environment variables AWS_ACCESS_KEY_ID and
+AWS_SECRET_ACCESS_KEY to the appropriate values for your AWS account.
+
+Then, just run `jack_the_ripper start -- -q {queuename}` to start the service
+as a daemon that checks to specified queue.
 
 Run `jack_the_ripper stop` to stop the service. Any currently processing
-instructions will complete before the system exits. Pass the --kill switch
-to stop immediately.
-
-By default, the system will store its pidfile in /var/run/jack_the_ripper.pid
-and its log file in /var/log/jack_the_ripper.log. You can override these
-locations when starting the system by passing the --pid and --log switches,
-respectively. Note that if you change the location of the pidfile, you will
-also need to pass the --pid option when stopping the system.
+instructions will complete before the system exits.
 
 === SQS Message Body
 
@@ -44,8 +41,8 @@ encoded Hash with the following keys:
 	(i.e. 'http://example.com/an_image.pdf' ). A GET request to this URI must
 	return the image file and a valid Content-Type header.
 * :result_uri - REQUIRED An HTTP URI to which a PUT request will be sent containing the
-	converted image data. The correct Content-Type header will also be sent with
-	this request.
+	converted image data in Base64 encoded format. The correct Content-Type
+	header will also be sent with	this request.
 * :format - OPTIONAL One of :jpeg, :tiff, :png, :gif, :jp2, :pict, :bmp,
 	:qtif, :psd, :sgi, :tga. The result file will be saved in this format.
 * :scale - OPTIONAL The maximum dimension of the width and height of the
