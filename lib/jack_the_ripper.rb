@@ -5,7 +5,7 @@ gem 'right_aws', '= 1.5.0'
 require 'right_aws'
 
 module JackTheRIPper
-  VERSION = '0.1.1'
+  VERSION = '0.1.2'
   class << self
     def tmp_path
       @tmp_path || '/tmp'
