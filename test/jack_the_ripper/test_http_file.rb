@@ -78,8 +78,8 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     end
   end
   
-  def test_should_raise_processor_error_if_get_fails_due_to_client_error
-    http_result = Net::HTTPClientError.allocate
+  def test_should_raise_processor_error_if_get_fails_due_to_404
+    http_result = Net::HTTPNotFound.allocate
     Net::HTTP.expects( :get_response ).
       with( URI.parse( 'http://example.com/file.pdf' ) ).
       returns( http_result )
@@ -89,26 +89,38 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     end
   end
   
-  def test_should_raise_processor_error_if_get_redirects_too_many_times
+  def test_should_raise_remote_error_if_get_fails_due_to_other_client_error
+    http_result = Net::HTTPClientError.allocate
+    Net::HTTP.expects( :get_response ).
+      with( URI.parse( 'http://example.com/file.pdf' ) ).
+      returns( http_result )
+    assert_raises( JackTheRIPper::RemoteError ) do
+      JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
+        '/tmp', 'source' )
+    end
+  end
+  
+  
+  def test_should_raise_remote_error_if_get_redirects_too_many_times
     http_result = Net::HTTPRedirection.allocate
     http_result.expects( :[] ).at_least_once.
       with( 'location' ).returns( 'http://example.com/file.pdf' )
     Net::HTTP.expects( :get_response ).times( 10 ).
       with( URI.parse( 'http://example.com/file.pdf' ) ).
       returns( http_result )
-    assert_raises( JackTheRIPper::ProcessorError ) do
+    assert_raises( JackTheRIPper::RemoteError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
         '/tmp', 'source', 10 )
     end
   end
   
-  def test_should_raise_remote_error_if_get_fails_due_to_connection_refused
-    Net::HTTP.stubs( :get_response ).raises( Errno::ECONNREFUSED )
+  def test_should_raise_remote_error_if_get_fails_due_to_uncaught_exception
+    Net::HTTP.stubs( :get_response ).raises( Exception )
     assert_raises( JackTheRIPper::RemoteError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf', '/tmp', 'source' )
     end
   end
-
+  
   def test_should_raise_remote_error_if_put_fails_due_to_server_error
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
@@ -125,7 +137,23 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     assert_raises( JackTheRIPper::RemoteError ) { f.put }
   end
 
-  def test_should_raise_processor_error_if_put_fails_due_to_client_error
+  def test_should_raise_processor_error_if_put_fails_due_to_404
+    f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
+      '/tmp/result.jpg' )
+    uri = URI.parse( 'http://example.com/result.jpg' )
+    http_conn = mock
+    Net::HTTP.expects( :start ).
+      with( uri.host, uri.port ).
+      yields( http_conn )
+    headers = { 'Content-Type' => 'image/jpeg' }
+    data = 'file contents'
+    File.expects( :read ).with( '/tmp/result.jpg' ).returns( data )
+    http_response = Net::HTTPNotFound.allocate
+    http_conn.stubs( :send_request ).returns( http_response )
+    assert_raises( JackTheRIPper::ProcessorError ) { f.put }
+  end
+  
+  def test_should_raise_remote_error_if_put_fails_due_to_other_client_error
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
     uri = URI.parse( 'http://example.com/result.jpg' )
@@ -138,13 +166,13 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     File.expects( :read ).with( '/tmp/result.jpg' ).returns( data )
     http_response = Net::HTTPClientError.allocate
     http_conn.stubs( :send_request ).returns( http_response )
-    assert_raises( JackTheRIPper::ProcessorError ) { f.put }
+    assert_raises( JackTheRIPper::RemoteError ) { f.put }
   end
-  
-  def test_should_raise_remote_error_if_connection_refused_during_put
+
+  def test_should_raise_remote_error_if_put_fails_due_to_uncaught_exception
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
-    Net::HTTP.stubs( :start ).raises( Errno::ECONNREFUSED )
+    Net::HTTP.stubs( :start ).raises( Exception )
     assert_raises( JackTheRIPper::RemoteError ) { f.put }
   end
 end
