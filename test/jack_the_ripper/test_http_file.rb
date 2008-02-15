@@ -8,12 +8,12 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     http_result = Net::HTTPSuccess.allocate
     http_result.stubs( :content_type ).returns( 'application/pdf' )
     http_result.stubs( :read_body ).returns( 'file contents' )
-    Net::HTTP.expects( :get_response ).
-      with( URI.parse( 'http://example.com/file.pdf' ) ).
-      returns( http_result )
     f = mock
     File.expects( :open ).with( '/tmp/source', 'w' ).yields( f )
     f.expects( :write ).with( 'file contents' )
+    JackTheRIPper::HTTPFile.expects( :send_request ).
+      with( 'http://example.com/file.pdf', :get ).
+      returns( http_result )
     file = JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
       '/tmp', 'source' )
     assert_equal '/tmp/source', file.path
@@ -25,11 +25,11 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     http_result = Net::HTTPSuccess.allocate
     http_result.stubs( :content_type ).returns( 'application/pdf' )
     http_result.stubs( :read_body ).returns( 'file contents' )
-    Net::HTTP.expects( :get_response ).
-      with( URI.parse( 'http://example.com/redirect_me' ) ).
+    JackTheRIPper::HTTPFile.expects( :send_request ).
+      with( 'http://example.com/redirect_me', :get ).
       returns( redirect )
-    Net::HTTP.expects( :get_response ).
-      with( URI.parse( 'http://example.com/file.pdf' ) ).
+    JackTheRIPper::HTTPFile.expects( :send_request ).
+      with( 'http://example.com/file.pdf', :get ).
       returns( http_result )
     f = stub_everything
     File.stubs( :open ).yields( f )
@@ -52,26 +52,19 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   def test_should_upload_file_to_specified_uri_via_put
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
-    uri = URI.parse( 'http://example.com/result.jpg' )
-    http_conn = mock
-    Net::HTTP.expects( :start ).
-      with( uri.host, uri.port ).
-      yields( http_conn )
     headers = { 'Content-Type' => 'image/jpeg' }
     data = 'file contents'
     File.expects( :read ).with( '/tmp/result.jpg' ).returns( data )
     http_response = Net::HTTPSuccess.allocate
-    http_conn.expects( :send_request ).
-      with( 'PUT', uri.request_uri, Base64.encode64( data ), headers ).
+    JackTheRIPper::HTTPFile.expects( :send_request ).
+      with( 'http://example.com/result.jpg', :put, Base64.encode64( data ), headers ).
       returns( http_response )
     f.put
   end
   
   def test_should_raise_remote_error_if_get_fails_due_to_server_error
     http_result = Net::HTTPServerError.allocate
-    Net::HTTP.expects( :get_response ).
-      with( URI.parse( 'http://example.com/file.pdf' ) ).
-      returns( http_result )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_result )
     assert_raises( JackTheRIPper::RemoteError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
         '/tmp', 'source' )
@@ -80,9 +73,7 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   
   def test_should_raise_processor_error_if_get_fails_due_to_404
     http_result = Net::HTTPNotFound.allocate
-    Net::HTTP.expects( :get_response ).
-      with( URI.parse( 'http://example.com/file.pdf' ) ).
-      returns( http_result )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_result )
     assert_raises( JackTheRIPper::ProcessorError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
         '/tmp', 'source' )
@@ -91,9 +82,7 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   
   def test_should_raise_remote_error_if_get_fails_due_to_other_client_error
     http_result = Net::HTTPClientError.allocate
-    Net::HTTP.expects( :get_response ).
-      with( URI.parse( 'http://example.com/file.pdf' ) ).
-      returns( http_result )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_result )
     assert_raises( JackTheRIPper::RemoteError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
         '/tmp', 'source' )
@@ -105,9 +94,7 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     http_result = Net::HTTPRedirection.allocate
     http_result.expects( :[] ).at_least_once.
       with( 'location' ).returns( 'http://example.com/file.pdf' )
-    Net::HTTP.expects( :get_response ).times( 10 ).
-      with( URI.parse( 'http://example.com/file.pdf' ) ).
-      returns( http_result )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_result )
     assert_raises( JackTheRIPper::RemoteError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf',
         '/tmp', 'source', 10 )
@@ -115,7 +102,7 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   end
   
   def test_should_raise_remote_error_if_get_fails_due_to_uncaught_exception
-    Net::HTTP.stubs( :get_response ).raises( Exception )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).raises( Exception )
     assert_raises( JackTheRIPper::RemoteError ) do
       JackTheRIPper::HTTPFile.get( 'http://example.com/file.pdf', '/tmp', 'source' )
     end
@@ -124,48 +111,27 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   def test_should_raise_remote_error_if_put_fails_due_to_server_error
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
-    uri = URI.parse( 'http://example.com/result.jpg' )
-    http_conn = mock
-    Net::HTTP.expects( :start ).
-      with( uri.host, uri.port ).
-      yields( http_conn )
-    headers = { 'Content-Type' => 'image/jpeg' }
-    data = 'file contents'
-    File.expects( :read ).with( '/tmp/result.jpg' ).returns( data )
+    File.stubs( :read ).returns( ' ' )
     http_response = Net::HTTPServerError.allocate
-    http_conn.stubs( :send_request ).returns( http_response )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_response )
     assert_raises( JackTheRIPper::RemoteError ) { f.put }
   end
 
   def test_should_raise_processor_error_if_put_fails_due_to_404
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
-    uri = URI.parse( 'http://example.com/result.jpg' )
-    http_conn = mock
-    Net::HTTP.expects( :start ).
-      with( uri.host, uri.port ).
-      yields( http_conn )
-    headers = { 'Content-Type' => 'image/jpeg' }
-    data = 'file contents'
-    File.expects( :read ).with( '/tmp/result.jpg' ).returns( data )
+    File.stubs( :read ).returns( ' ' )
     http_response = Net::HTTPNotFound.allocate
-    http_conn.stubs( :send_request ).returns( http_response )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_response )
     assert_raises( JackTheRIPper::ProcessorError ) { f.put }
   end
   
   def test_should_raise_remote_error_if_put_fails_due_to_other_client_error
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
-    uri = URI.parse( 'http://example.com/result.jpg' )
-    http_conn = mock
-    Net::HTTP.expects( :start ).
-      with( uri.host, uri.port ).
-      yields( http_conn )
-    headers = { 'Content-Type' => 'image/jpeg' }
-    data = 'file contents'
-    File.expects( :read ).with( '/tmp/result.jpg' ).returns( data )
+    File.stubs( :read ).returns( ' ' )
     http_response = Net::HTTPClientError.allocate
-    http_conn.stubs( :send_request ).returns( http_response )
+    JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_response )
     assert_raises( JackTheRIPper::RemoteError ) { f.put }
   end
 

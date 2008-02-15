@@ -11,10 +11,14 @@ module JackTheRIPper
     end
     
     def process
+      JackTheRIPper.logger.debug "Processing message"
       source_file = HTTPFile.get( @source_uri, JackTheRIPper.tmp_path, 'source' )
+      JackTheRIPper.logger.debug "Source file retrieved."
       result_ext = @format.nil? ? File.extname( source_file.path ) : ".#{@format}"
       result_path = JackTheRIPper.tmp_path + '/result' + result_ext
-      output = `sips #{sips_args} #{source_file.path} --out #{result_path}`
+      cmd = "sips #{sips_args} #{source_file.path} --out #{result_path}"
+      output = `#{cmd}`
+      JackTheRIPper.logger.debug "Ran command #{cmd}"
       raise ProcessorError, output unless File.exist?( result_path )
       result_file = HTTPFile.new( @result_uri, result_path )
       result_file.put

@@ -26,7 +26,7 @@ class TestJackTheRIPper < Test::Unit::TestCase
   end
   
   def test_should_not_delete_message_from_queue_if_conversion_fails_due_to_remote_error
-    logger = mock
+    logger = stub_everything
     JackTheRIPper.logger = logger
     message = mock
     queue = stub_everything( :receive => message )
@@ -40,7 +40,7 @@ class TestJackTheRIPper < Test::Unit::TestCase
   end
   
   def test_should_delete_message_from_queue_if_conversion_fails_due_to_processor_error
-    logger = mock
+    logger = stub_everything
     JackTheRIPper.logger = logger
     message = mock
     queue = stub_everything( :receive => message )
