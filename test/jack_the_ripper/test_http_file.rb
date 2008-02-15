@@ -57,7 +57,7 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     File.expects( :read ).with( '/tmp/result.jpg' ).returns( data )
     http_response = Net::HTTPSuccess.allocate
     JackTheRIPper::HTTPFile.expects( :send_request ).
-      with( 'http://example.com/result.jpg', :put, Base64.encode64( data ), headers ).
+      with( 'http://example.com/result.jpg', :put, headers, Base64.encode64( data ) ).
       returns( http_response )
     f.put
   end

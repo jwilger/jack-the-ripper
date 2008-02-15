@@ -29,7 +29,7 @@ module JackTheRIPper
       end
       logger.info "PUTing file: #{@uri}"
       content_type = MIME::Types.type_for( @path ).first.content_type
-      result = HTTPFile.send_request( uri || @uri, :put, Base64.encode64( File.read( @path ) ), { 'Content-Type' => content_type } )
+      result = HTTPFile.send_request( uri || @uri, :put, { 'Content-Type' => content_type }, Base64.encode64( File.read( @path ) ) )
       case result
       when Net::HTTPSuccess
         # ok
