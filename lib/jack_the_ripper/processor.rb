@@ -22,7 +22,6 @@ module JackTheRIPper
       raise ProcessorError, output unless File.exist?( result_path )
       result_file = HTTPFile.new( @result_uri, result_path )
       result_file.put
-      `say -v "Bad News" "Image converted money in the ba-ank."`
     ensure
       source_file.delete unless source_file.nil?
       result_file.delete unless result_file.nil?

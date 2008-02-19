@@ -31,7 +31,6 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
     processor = JackTheRIPper::Processor.new( instruction )
     
     processor.expects( :` ).with( "sips -s format jpg -s formatOptions best #{working_dir_path}/source.pdf --out #{working_dir_path}/result.jpg" )
-    processor.expects( :` ).with( "say -v \"Bad News\" \"Image converted money in the ba-ank.\"" )
     File.expects( :exist? ).with( working_dir_path + '/result.jpg' ).returns( true )
     
     processor.process
@@ -64,7 +63,6 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
     processor = JackTheRIPper::Processor.new( instruction )
     
     processor.expects( :` ).with( "sips -s format png -s formatOptions best #{working_dir_path}/source.pdf --out #{working_dir_path}/result.png" )
-    processor.expects( :` ).with( "say -v \"Bad News\" \"Image converted money in the ba-ank.\"" )
     File.expects( :exist? ).with( working_dir_path + '/result.png' ).returns( true )
     
     processor.process
@@ -97,7 +95,6 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
     processor = JackTheRIPper::Processor.new( instruction )
     
     processor.expects( :` ).with( "sips -Z 75 #{working_dir_path}/source.jpg --out #{working_dir_path}/result.jpg" )
-    processor.expects( :` ).with( "say -v \"Bad News\" \"Image converted money in the ba-ank.\"" )
     File.expects( :exist? ).with( working_dir_path + '/result.jpg' ).returns( true )
     
     processor.process
@@ -130,7 +127,6 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
     processor = JackTheRIPper::Processor.new( instruction )
     
     processor.expects( :` ).with( "sips -p 75 100 --padColor FFFFFF #{working_dir_path}/source.jpg --out #{working_dir_path}/result.jpg" )
-    processor.expects( :` ).with( "say -v \"Bad News\" \"Image converted money in the ba-ank.\"" )
     File.expects( :exist? ).with( working_dir_path + '/result.jpg' ).returns( true )
     
     processor.process
@@ -165,7 +161,6 @@ class TestJackTheRIPperProcessor < Test::Unit::TestCase
     processor = JackTheRIPper::Processor.new( instruction )
     
     processor.expects( :` ).with( "sips -s format jpg -s formatOptions best -Z 75 -p 75 100 --padColor FFFFFF #{working_dir_path}/source.pdf --out #{working_dir_path}/result.jpg" )
-    processor.expects( :` ).with( "say -v \"Bad News\" \"Image converted money in the ba-ank.\"" )
     File.expects( :exist? ).with( working_dir_path + '/result.jpg' ).returns( true )
     
     processor.process
