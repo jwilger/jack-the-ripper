@@ -48,6 +48,7 @@ end
 opts.parse!( ARGV )
 
 @logger = Logger.new( options.log_file )
+@logger.level = Logger::WARN
 JackTheRIPper.tmp_path = options.tmp_path
 JackTheRIPper.logger = @logger
 queue = JackTheRIPper.get_queue( options.access_key_id,
