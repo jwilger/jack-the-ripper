@@ -88,6 +88,8 @@ module JackTheRIPper
           logger.debug "HTTP#{ uri.scheme == 'https' ? 'S' : '' } connection started."
           h.send_request( method.to_s.upcase, uri.request_uri, body, headers )
         end
+      rescue URI::InvalidURIError => e
+        raise JackTheRIPper::ProcessorError, "Invalid URI for #{method}: #{uri}"
       end
     end
   end

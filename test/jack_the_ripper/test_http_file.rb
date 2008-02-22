@@ -80,6 +80,13 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     end
   end
   
+  def test_should_raise_processor_error_if_get_fails_due_to_invalid_uri
+    assert_raises( JackTheRIPper::ProcessorError ) do
+      JackTheRIPper::HTTPFile.get( 'http://example.com/file[invalid].pdf',
+        '/tmp', 'source' )
+    end
+  end
+  
   def test_should_raise_remote_error_if_get_fails_due_to_other_client_error
     http_result = Net::HTTPClientError.allocate
     JackTheRIPper::HTTPFile.stubs( :send_request ).returns( http_result )
@@ -88,7 +95,6 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
         '/tmp', 'source' )
     end
   end
-  
   
   def test_should_raise_remote_error_if_get_redirects_too_many_times
     http_result = Net::HTTPRedirection.allocate
@@ -126,6 +132,13 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
     assert_raises( JackTheRIPper::ProcessorError ) { f.put }
   end
   
+  def test_should_raise_processor_error_if_put_fails_due_to_invalid_uri
+    f = JackTheRIPper::HTTPFile.new( 'http://example.com/result[invalid].jpg',
+      '/tmp/result.jpg' )
+    File.stubs( :read ).returns( ' ' )
+    assert_raises( JackTheRIPper::ProcessorError ) { f.put }
+  end
+  
   def test_should_raise_remote_error_if_put_fails_due_to_other_client_error
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
@@ -138,7 +151,8 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   def test_should_raise_remote_error_if_put_fails_due_to_uncaught_exception
     f = JackTheRIPper::HTTPFile.new( 'http://example.com/result.jpg',
       '/tmp/result.jpg' )
-    Net::HTTP.stubs( :start ).raises( Exception )
+    File.stubs( :read ).returns( ' ' )
+    Net::HTTP.stubs( :start ).raises( Exception.new )
     assert_raises( JackTheRIPper::RemoteError ) { f.put }
   end
 end
