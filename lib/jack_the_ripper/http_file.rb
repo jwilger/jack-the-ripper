@@ -1,4 +1,5 @@
 require 'uri'
+require 'jack_the_ripper/uri_fix'
 require 'net/http'
 require 'net/https'
 require 'rubygems'

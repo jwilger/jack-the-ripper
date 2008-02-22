@@ -22,6 +22,7 @@ options.secret_access_key = ENV[ 'AWS_SECRET_ACCESS_KEY' ]
 options.queue_name = ''
 options.tmp_path = '/tmp'
 options.log_file = '/var/log/jack_the_ripper.log'
+options.debug = false
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: jack_the_ripper_server [options]"
@@ -40,6 +41,10 @@ opts = OptionParser.new do |opts|
     options.log_file = log_file
   end
   
+  opts.on( '--debug', 'Set debug-level logging.' ) do |debug|
+    options.debug = true
+  end
+  
   opts.on_tail("-h", "--help", "Show this message") do
     puts opts
     exit
@@ -48,7 +53,7 @@ end
 opts.parse!( ARGV )
 
 @logger = Logger.new( options.log_file )
-@logger.level = Logger::WARN
+@logger.level = Logger::WARN unless options.debug
 JackTheRIPper.tmp_path = options.tmp_path
 JackTheRIPper.logger = @logger
 queue = JackTheRIPper.get_queue( options.access_key_id,

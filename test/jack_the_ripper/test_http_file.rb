@@ -82,7 +82,7 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   
   def test_should_raise_processor_error_if_get_fails_due_to_invalid_uri
     assert_raises( JackTheRIPper::ProcessorError ) do
-      JackTheRIPper::HTTPFile.get( 'http://example.com/file[invalid].pdf',
+      JackTheRIPper::HTTPFile.get( 'not a url',
         '/tmp', 'source' )
     end
   end
@@ -133,7 +133,7 @@ class TestJackTheRIPperHTTPFile < Test::Unit::TestCase
   end
   
   def test_should_raise_processor_error_if_put_fails_due_to_invalid_uri
-    f = JackTheRIPper::HTTPFile.new( 'http://example.com/result[invalid].jpg',
+    f = JackTheRIPper::HTTPFile.new( 'not a url',
       '/tmp/result.jpg' )
     File.stubs( :read ).returns( ' ' )
     assert_raises( JackTheRIPper::ProcessorError ) { f.put }
