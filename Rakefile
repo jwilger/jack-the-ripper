@@ -13,5 +13,5 @@ Hoe.new('JackTheRIPper', JackTheRIPper::VERSION) do |p|
   p.description = p.paragraphs_of('README.txt', 2..5).join("\n\n")
   p.url = 'http://johnwilger.com/search?q=JackTheRIPper'
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
-  p.extra_deps = %w( right_aws mime-types daemons )
+  p.extra_deps = %w( mime-types daemons )
 end

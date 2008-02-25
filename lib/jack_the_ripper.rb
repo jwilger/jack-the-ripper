@@ -1,7 +1,8 @@
 $:.unshift( File.expand_path( File.dirname( __FILE__ ) ) )
+VENDOR_DIR = File.expand_path( File.dirname( __FILE__ ) + '/../vendor' )
+$:.unshift( VENDOR_DIR + '/right_aws-1.5.0/lib' )
+$:.unshift( VENDOR_DIR + '/right_http_connection-1.2.1/lib' )
 require 'yaml'
-require 'rubygems'
-gem 'right_aws', '= 1.5.0'
 require 'right_aws'
 
 module JackTheRIPper
