@@ -1,9 +1,8 @@
+$:.unshift( VENDOR_DIR + '/mime-types-1.15/lib' )
 require 'uri'
 require 'jack_the_ripper/uri_fix'
 require 'net/http'
 require 'net/https'
-require 'rubygems'
-gem 'mime-types'
 require 'mime/types'
 
 module JackTheRIPper
