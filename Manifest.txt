@@ -11,6 +11,13 @@ lib/jack_the_ripper_server.rb
 test/jack_the_ripper/test_http_file.rb
 test/jack_the_ripper/test_processor.rb
 test/test_jack_the_ripper.rb
+vendor/hoe-1.5.0/History.txt
+vendor/hoe-1.5.0/Manifest.txt
+vendor/hoe-1.5.0/README.txt
+vendor/hoe-1.5.0/Rakefile
+vendor/hoe-1.5.0/bin/sow
+vendor/hoe-1.5.0/lib/hoe.rb
+vendor/hoe-1.5.0/test/test_hoe.rb
 vendor/mocha/COPYING
 vendor/mocha/MIT-LICENSE
 vendor/mocha/README

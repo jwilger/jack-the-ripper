@@ -1,6 +1,4 @@
-# -*- ruby -*-
-
-require 'rubygems'
+$:.unshift( File.expand_path( File.dirname( __FILE__ ) + '/vendor/hoe-1.5.0/lib' ) )
 require 'hoe'
 require './lib/jack_the_ripper.rb'
 
@@ -15,5 +13,3 @@ Hoe.new('JackTheRIPper', JackTheRIPper::VERSION) do |p|
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
   p.extra_deps = %w( right_aws mime-types daemons )
 end
-
-# vim: syntax=Ruby
