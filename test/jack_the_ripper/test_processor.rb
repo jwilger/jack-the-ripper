@@ -8,6 +8,10 @@ require 'mocha'
 require 'jack_the_ripper'
 
 class TestJackTheRIPperProcessor < Test::Unit::TestCase
+  def setup
+    JackTheRIPper.stubs( :logger ).returns( stub_everything )
+  end
+  
   def test_should_convert_image_format_to_jpeg_and_put_resulting_file
     working_dir_path = File.expand_path( File.dirname( __FILE__ ) + '/../../tmp' )
     JackTheRIPper.stubs( :tmp_path ).returns( working_dir_path )
