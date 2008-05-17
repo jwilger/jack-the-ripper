@@ -15,6 +15,3 @@ Hoe.new('JackTheRIPper', JackTheRIPper::VERSION) do |p|
   p.changes = p.paragraphs_of('History.txt', 0..1).join("\n\n")
   p.extra_deps = %w( mime-types daemons )
 end
-
-desc "Run the cruise control build"
-task :cruise => [ :test, :check_manifest, :gem ]
