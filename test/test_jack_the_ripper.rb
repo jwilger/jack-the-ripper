@@ -1,4 +1,6 @@
-$:.unshift( File.expand_path( File.dirname( __FILE__ ) + '/../vendor/mocha/lib' ) )
+require 'rubygems'
+gem 'mocha', '=0.5.6'
+
 require 'test/unit'
 require 'mocha'
 require 'jack_the_ripper'
