@@ -1,3 +1,5 @@
+$:.unshift( File.expand_path( File.dirname( __FILE__ ) + '/../../lib' ) )
+
 require 'rubygems'
 gem 'mocha', '=0.5.6'
 
