@@ -3,7 +3,6 @@ Manifest.txt
 README.txt
 Rakefile
 bin/jack_the_ripper
-cruise_config.rb
 lib/jack_the_ripper.rb
 lib/jack_the_ripper/http_file.rb
 lib/jack_the_ripper/processor.rb
