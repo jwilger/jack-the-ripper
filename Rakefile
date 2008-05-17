@@ -1,6 +1,6 @@
-VENDOR_DIR = File.expand_path( File.dirname( __FILE__ ) + '/vendor' )
-$:.unshift( VENDOR_DIR + '/hoe-1.5.0/lib' )
-$:.unshift( VENDOR_DIR + '/rubyforge-0.4.4/lib' )
+require 'rubygems'
+gem 'hoe', '=1.5.1'
+
 require 'hoe'
 require './lib/jack_the_ripper.rb'
 
