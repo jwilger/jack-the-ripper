@@ -1,9 +1,9 @@
-$:.unshift( VENDOR_DIR + '/mime-types-1.15/lib' )
+gem 'mime-types'
+require 'mime/types'
 require 'uri'
 require 'jack_the_ripper/uri_fix'
 require 'net/http'
 require 'net/https'
-require 'mime/types'
 
 module JackTheRIPper
   class HTTPFile
