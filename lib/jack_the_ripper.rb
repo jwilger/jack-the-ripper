@@ -6,7 +6,7 @@ require 'yaml'
 require 'right_aws'
 
 module JackTheRIPper
-  VERSION = '1.3.1.1'
+  VERSION = '1.4.1'
   
   class RemoteError < StandardError; end
   class ProcessorError < StandardError; end
