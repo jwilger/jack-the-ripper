@@ -14,6 +14,13 @@ module JackTheRIPper
       JackTheRIPper.logger.debug "Processing message"
       source_file = HTTPFile.get( @source_uri, JackTheRIPper.tmp_path, 'source' )
       JackTheRIPper.logger.debug "Source file retrieved."
+      file_type_info = `file #{source_file.path}`
+      if /\bPostscript\b/ =~ file_type_info
+        `pstopdf #{source_file.path} -o #{source_file.path}.pdf`
+        new_source_file = HTTPFile.new('', "#{source_file.path}.pdf")
+        source_file.delete
+        source_file = new_source_file
+      end
       result_ext = @format.nil? ? File.extname( source_file.path ) : ".#{@format}"
       result_path = JackTheRIPper.tmp_path + '/result' + result_ext
       cmd = "sips #{sips_args} #{source_file.path} --out #{result_path}"
