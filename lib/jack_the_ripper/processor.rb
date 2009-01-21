@@ -15,7 +15,7 @@ module JackTheRIPper
       source_file = HTTPFile.get( @source_uri, JackTheRIPper.tmp_path, 'source' )
       JackTheRIPper.logger.debug "Source file retrieved."
       file_type_info = `file #{source_file.path}`
-      if /\bPostscript\b/ =~ file_type_info
+      if /\bpostscript\b/i =~ file_type_info
         `pstopdf #{source_file.path} -o #{source_file.path}.pdf`
         new_source_file = HTTPFile.new('', "#{source_file.path}.pdf")
         source_file.delete
