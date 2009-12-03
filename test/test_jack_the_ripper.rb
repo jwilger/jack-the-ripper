@@ -65,7 +65,7 @@ class TestJackTheRIPper < Test::Unit::TestCase
     sqs = mock
     queue = stub
     sqs.expects( :queue ).with( 'myqueue', true, 240 ).returns( queue )
-    RightAws::Sqs.expects( :new ).with( 'myaccesskeyid', 'mysecretaccesskey' ).
+    RightAws::SqsGen2.expects( :new ).with( 'myaccesskeyid', 'mysecretaccesskey' ).
       returns( sqs )
     assert_same queue, JackTheRIPper.get_queue( 'myaccesskeyid',
       'mysecretaccesskey', 'myqueue' )

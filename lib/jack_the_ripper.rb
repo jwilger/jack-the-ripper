@@ -6,7 +6,7 @@ require 'yaml'
 require 'right_aws'
 
 module JackTheRIPper
-  VERSION = '1.4.3'
+  VERSION = '1.4.4'
   
   class RemoteError < StandardError; end
   class ProcessorError < StandardError; end
@@ -44,7 +44,7 @@ module JackTheRIPper
     end
     
     def get_queue( access_key_id, secret_access_key, queue_name )
-      RightAws::Sqs.new( access_key_id, secret_access_key ).
+      RightAws::SqsGen2.new( access_key_id, secret_access_key ).
         queue( queue_name, true, 240 )
     end
   end

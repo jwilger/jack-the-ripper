@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 LOAD_PATH = File.expand_path( File.dirname( __FILE__ ) + '/../lib' )
 require 'rubygems'
-gem 'daemons', '= 1.0.9'
+gem 'daemons', '>= 1.0.9'
 require 'daemons'
 Daemons.run( LOAD_PATH + '/jack_the_ripper_server.rb', {
   :app_name => 'JackTheRIPper',
