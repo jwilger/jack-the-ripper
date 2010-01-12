@@ -1,0 +1,6 @@
+WTF?  Some notes that may be helpful in troubleshooting the Jack server here at CTI.
+------------------------------------------------------------------------------------
+
+Q:  I rebooted the server, and now Jack is (looking at an old queue / logging to an old place / reverting to some old behavior).
+A:  Check the launchctl configuration file at /Library/LaunchDaemons/org.cti.jack_the_ripper.plist.  You might have made changes and relaunched Jack under your own user account, but when the server reboots, it'll start Jack using the settings in this file.  Edit the file, then use '[sudo] launchctl list' to find its launchctl "label".  (If you don't see it by yourself, try sudo.)  Then do 'sudo launchctl unload foo; sudo launchctl load foo'.
+
